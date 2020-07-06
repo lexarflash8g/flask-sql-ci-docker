@@ -1,0 +1,7 @@
+default_context:
+        full_name: "Mark Takacs"
+        email: "mark@takacsmark.com"
+        github_username: "takacsmark"
+        app_name: "app"
+        project_name: "Flask SQL CI Docker"
+        project_short_description: "Docker example"

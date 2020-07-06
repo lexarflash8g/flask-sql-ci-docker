@@ -1,0 +1,59 @@
+version: '3.5'
+
+services:
+        web:
+                build:
+                        context: ../../
+                        dockerfile: docker/prod/Dockerfile
+                        args:
+                                app_name: ${APP_NAME}
+                                python_image_version: ${PYTHON_IMAGE_VERSION}
+                image: ${DOCKER_USERNAME}/flask-sql-ci-web:${APP_VERSION}-prod
+                ports:
+                        - 5000:5000
+                environment:
+                        POSTGRES_PASSWORD: /run/secrets/db_password
+                        FLASK_APP: autoapp.py
+                        FLASK_DEBUG: 0
+                        FLASK_ENV: production
+                        APP_SECRET: /run/secrets/app_secret
+                networks:
+                        - flaskappnet
+                secrets:
+                        - app_secret
+                        - db_password
+                deploy:
+                        replicas: 2
+        postgres:
+                image: postgres:${POSTGRES_IMAGE_VERSION}
+                environment:
+                        POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+                volumes:
+                        - type: volume
+                          source: proddb
+                          target: /var/lib/postgresql/data
+                networks:
+                        - flaskappnet
+                secrets:
+                        - db_password
+                deploy:
+                        placement:
+                                constraints: [node.role == manager]
+        visualizer:
+                image: dockersamples/visualizer:stable
+                ports:
+                        - "8080:8080"
+                volumes:
+                        - "/var/run/docker.sock:/var/run/docker.sock"
+                deploy:
+                        placement:
+                                constraints: [node.role == manager]
+secrets:
+        db_password:
+                file: ../../_db_password.txt
+        app_secret:
+                file: ../../_app_secret.txt
+volumes:
+        proddb:
+networks:
+        flaskappnet:

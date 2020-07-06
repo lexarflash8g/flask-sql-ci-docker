@@ -1,0 +1,4 @@
+*/migrations/**
+node_modules
+_db_password.txt
+_app_secret.txt
